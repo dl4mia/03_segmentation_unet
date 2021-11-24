@@ -30,8 +30,8 @@ From within the same terminal in your browser, create a `conda` environment for 
 ```
 conda create -n 03_segmentation_unet python=3.7
 conda activate 03_segmentation_unet
-conda install -c pytorch pytorch torchvision cudatoolkit=10.2 matplotlib jupyter
-pip install tensorboard imageio scipy
+conda install -c pytorch pytorch torchvision cudatoolkit=10.2 jupyter
+pip install tensorboard imageio scipy matplotlib
 ```
 
 Now navigate to the exercise folder using jupyter and get going! :)
