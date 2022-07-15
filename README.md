@@ -7,4 +7,4 @@ In this tutorial, we shall learn to train a U-Net model for performing semantic 
 See **[this](https://carbonated-tub-0d7.notion.site/Pixel-Classification-with-U-Net-DL4MIA-22-cfe23dfb98e14a6d968574772e89559d)** document for installing the packages and running the included exercises. 
 
 
-[Return to the Course's main page](https://tinyurl.com/7z8jxx2w)
+**[Return to the Course's main page](https://tinyurl.com/7z8jxx2w)**
