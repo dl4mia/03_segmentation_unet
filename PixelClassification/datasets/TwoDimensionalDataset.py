@@ -8,8 +8,9 @@ from skimage.segmentation import relabel_sequential
 from torch.utils.data import Dataset
 
 
+
 class TwoDimensionalDataset(Dataset):
-    def __init__(self, data_dir, type, bg_id=0, size=None, crop_z=None, crop_y=192, crop_x = 192, transform=None):
+    def __init__(self, data_dir, type, bg_id=0, size=None, transform=None):
         print('2D `{}` Dataset created.'.format(type))
         # get image and instance list
         image_list = sorted(glob.glob(os.path.join(data_dir, '{}/'.format(type), 'images/*.tif')))
@@ -23,32 +24,19 @@ class TwoDimensionalDataset(Dataset):
         self.real_size = len(self.image_list)
         self.transform = transform
         self.type = type
-        self.crop_y = np.maximum(crop_y, crop_x)
-        self.crop_x = np.maximum(crop_y, crop_x)
-
+        
     def __getitem__(self, index):
         index = index if self.size is None else random.randint(0, self.real_size - 1)
         sample = {}
         image = tifffile.imread(self.image_list[index]) # Y X
         mask = tifffile.imread(self.instance_list[index])  # Y X
-        image_normalized = self.normalize(image[np.newaxis, ...], axis=(1, 2))  # added new axis already for channel
-        class_map, instance_map = self.convert_instance_to_class_ids(mask)
-        if self.type == 'train' or self.type=='val':
-            inside = 0
-            while not inside:
-                y_start = np.random.randint(image.shape[0])
-                x_start = np.random.randint(image.shape[1])
-                if y_start + self.crop_y <= image.shape[0] and x_start + self.crop_x <= image.shape[1] and len(np.unique(instance_map[y_start:y_start + self.crop_y, x_start:x_start + self.crop_x]))>1:
-                    sample['image'] = image_normalized[:, y_start:y_start + self.crop_y, x_start:x_start + self.crop_x]
-                    sample['semantic_mask'] = class_map[np.newaxis, y_start:y_start + self.crop_y, x_start:x_start + self.crop_x]  # 1 Y X
-                    sample['instance_mask'] = instance_map[np.newaxis, y_start:y_start + self.crop_y, x_start:x_start + self.crop_x]  # 1 Y X
-                    inside = 1
+        if self.type=='train' or self.type=='val':
+            sample['image'] = image[np.newaxis, ...] # already normalized while generating crops
         else:
-            sample['image'] = image_normalized
-            sample['semantic_mask'] = class_map[np.newaxis, ...]
-            sample['instance_mask'] = instance_map[np.newaxis, ...]
-
-
+            sample['image'] = self.normalize(image[np.newaxis, ...], axis=(1, 2))  # added new axis already for channel
+        class_map, instance_map = self.convert_instance_to_class_ids(mask)
+        sample['semantic_mask'] = class_map[np.newaxis, ...]
+        sample['instance_mask'] = instance_map[np.newaxis, ...]
         sample['im_name'] = self.image_list[index]
         if (self.transform is not None):
             return self.transform(sample)
@@ -58,6 +46,8 @@ class TwoDimensionalDataset(Dataset):
     def __len__(self):
         return self.real_size if self.size is None else self.size
 
+    
+    
     @classmethod
     def convert_instance_to_class_ids(cls, pic, bg_id=0):
         class_map = convert_to_class_labels(pic)
@@ -93,7 +83,7 @@ class TwoDimensionalDataset(Dataset):
 
         return x
 
-
+    
 def convert_to_class_labels(lbl):
     b = find_boundaries(lbl, mode='outer')
     res = (lbl > 0).astype(np.uint8)

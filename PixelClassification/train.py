@@ -14,6 +14,8 @@ from scipy import ndimage
 torch.backends.cudnn.benchmark = True
 
 
+
+
 def train():
     loss_meter = AverageMeter()
     model.train()
@@ -23,6 +25,7 @@ def train():
         images = sample['image']  # B 1 Z Y X
         semantic_masks = sample['semantic_mask']  # B 1 Z Y X
         semantic_masks.squeeze_(1)  # B Z Y X (loss expects this format)
+        instance = sample['instance_mask']
         output = model(images)  # B 3 Z Y X
         loss = criterion(output, semantic_masks.long())  # B 1 Z Y X
         loss = loss.mean()
@@ -32,6 +35,9 @@ def train():
         loss_meter.update(loss.item())
 
     return loss_meter.avg
+
+
+
 
 
 def val():
@@ -83,6 +89,9 @@ def save_checkpoint(state, is_best, save_dir, name='checkpoint.pth'):
 
 
 def begin_training(train_dataset_dict, val_dataset_dict, model_dict, configs, color_map='magma'):
+    
+    
+
     if configs['save']:
         if not os.path.exists(configs['save_dir']):
             os.makedirs(configs['save_dir'])
