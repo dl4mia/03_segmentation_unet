@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 
 
 class ThreeDimensionalDataset(Dataset):
-    def __init__(self, data_dir, type, bg_id=0, size=None, crop_z=32, crop_y=64, crop_x=64, transform=None):
+    def __init__(self, data_dir, type, bg_id=0, size=None, transform=None):
         print('3D `{}` Dataset created'.format(type))
         # get image and instance list
 
@@ -24,9 +24,6 @@ class ThreeDimensionalDataset(Dataset):
         self.real_size = len(self.image_list)
         self.transform = transform
         self.type = type
-        self.crop_z = crop_z
-        self.crop_y = crop_y
-        self.crop_x = crop_x
         print("Number of 3D images discovered is {}".format(self.real_size))
 
     def __getitem__(self, index):
@@ -38,23 +35,10 @@ class ThreeDimensionalDataset(Dataset):
         class_map, instance_map = self.convert_instance_to_class_ids(mask)
 
         if self.type == 'train' or self.type == 'val':
-            inside = 0
-            while not inside:
-                z_start = np.random.randint(image.shape[0])
-                y_start = np.random.randint(image.shape[1])
-                x_start = np.random.randint(image.shape[2])
-                if z_start + self.crop_z <= image.shape[0] and y_start + self.crop_y <= image.shape[
-                    1] and x_start + self.crop_x <= image.shape[2] and len(
-                        np.unique(instance_map[z_start:z_start + self.crop_z,
-                                  y_start:y_start + self.crop_y, x_start:x_start + self.crop_x])) > 1:
-                    sample['image'] = image_normalized[:, z_start:z_start + self.crop_z, y_start:y_start + self.crop_y,
-                                      x_start:x_start + self.crop_x]
-                    sample['semantic_mask'] = class_map[np.newaxis, z_start:z_start + self.crop_z,
-                                              y_start:y_start + self.crop_y,
-                                              x_start:x_start + self.crop_x]  # 1 Z Y X
-                    sample['instance_mask'] = instance_map[np.newaxis, z_start:z_start + self.crop_z,
-                                              y_start:y_start + self.crop_y, x_start:x_start + self.crop_x]  # 1 Z Y X
-                    inside = 1
+            sample['image'] = image[np.newaxis, ...] # already normalized
+            sample['semantic_mask'] = class_map[np.newaxis, ...]
+            sample['instance_mask'] = instance_map[np.newaxis, ...]
+
         else:
             sample['image'] = image_normalized
             sample['semantic_mask'] = class_map[np.newaxis, ...]

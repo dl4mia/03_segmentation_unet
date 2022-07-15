@@ -116,7 +116,7 @@ def process(im, inst, crops_dir, data_subset, crop_size,  norm='min-max-percenti
                 
         
 def process_3d(im, inst, crops_dir, data_subset, crop_size_x, crop_size_y, crop_size_z, norm='min-max-percentile',
-               anisotropy_factor=1.0, speed_up=1.0):
+               fraction_max_ids = 1.0, anisotropy_factor=1.0, speed_up=2.0, background_id = 0):
     
 
 
