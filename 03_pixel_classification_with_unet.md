@@ -1,4 +1,6 @@
-# Pixel Classification with U-Net (DL4MIA-22)
+# DL4MIA 2023: 03- Pixel Classification with U-Net
+
+**[Return to the Welcome page](https://tinyurl.com/33y2b2hk)**
 
 ### Goals
 
@@ -36,17 +38,16 @@ Open a fresh terminal window (click on *Activities* at top-left and select *Term
 
 ```bash
 cd DL4MIA
-conda create -y -n pytorchEnv python==3.7
+conda create -y -n pytorchEnv python==3.9
 conda activate pytorchEnv
 
-conda install cudatoolkit=11.3 -c conda-forge
-pip install torch torchvision
+conda install pytorch torchvision pytorch-cuda=11.8 'numpy<1.24' scipy matplotlib tifffile jupyter -c pytorch -c nvidia
 
 git clone https://github.com/dl4mia/03_segmentation_unet.git
 cd 03_segmentation_unet
 pip install -e .
 
-python3 -c "import torch; print(torch.cuda.is_available())
+python3 -c "import torch; print(torch.cuda.is_available())"
 ```
 
 ### [1/1] **Train and Infer with a 2D *U-Net* network**
@@ -54,7 +55,7 @@ python3 -c "import torch; print(torch.cuda.is_available())
 Browse to the 2D exercise:
 
 ```bash
-cd 03_segmentation_unet/examples/DL4MIA/train-and-predict-2d.ipynb
+cd examples/DL4MIA
 jupyter notebook
 ```
 
