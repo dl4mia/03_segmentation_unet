@@ -21,10 +21,9 @@ def test(*args):
     with torch.no_grad():
         result_list = []
         image_file_names = []
-        for sample in tqdm(dataset_it):
-
+        for idx, sample in tqdm(enumerate(dataset_it)):
             im = sample['image']  # B 1 Y X
-            instance = sample['instance_mask']
+            instance = sample['semantic_mask']
             multiple_y = im.shape[2] // 8
             multiple_x = im.shape[3] // 8
 
@@ -43,6 +42,7 @@ def test(*args):
             output = model(im)  # B 3 Y X
 
             output_softmax = F.softmax(output[0], dim=0)
+            semantic_pred = torch.argmax(output_softmax, dim=0).detach().cpu().numpy()
             seed_map = output_softmax[1, ...].cpu().detach().numpy()  # Y X
             pred_fg_thresholded = seed_map > 0.5
             instance_map, _ = ndimage.label(pred_fg_thresholded)
@@ -74,6 +74,11 @@ def test(*args):
                 if not os.path.exists(os.path.join(save_dir, 'predictions/')):
                     os.makedirs(os.path.join(save_dir, 'predictions/'))
                     print("Created new directory {}".format(os.path.join(save_dir, 'predictions/')))
+                
+                if not os.path.exists(os.path.join(save_dir, 'semantic_predictions/')):
+                    os.makedirs(os.path.join(save_dir, 'semantic_predictions/'))
+                    print("Created new directory {}".format(os.path.join(save_dir, 'semantic_predictions/')))
+
                 if not os.path.exists(os.path.join(save_dir, 'ground-truth/')):
                     os.makedirs(os.path.join(save_dir, 'ground-truth/'))
                     print("Created new directory {}".format(os.path.join(save_dir, 'ground-truth/')))
@@ -84,6 +89,10 @@ def test(*args):
                 base, _ = os.path.splitext(os.path.basename(sample['im_name'][0]))
                 instances_file = os.path.join(save_dir, 'predictions/', base + '.tif')  # TODO
                 imsave(instances_file, instance_map_filtered)
+
+                semantic_file = os.path.join(save_dir, 'semantic_predictions/', base + '.tif')  # TODO
+                imsave(semantic_file, semantic_pred)
+
                 gt_file = os.path.join(save_dir, 'ground-truth/', base + '.tif')  # TODO
                 imsave(gt_file, instance[0, 0, ...].cpu().detach().numpy())
                 seed_file = os.path.join(save_dir, 'seeds/', base + '.tif')  # TODO
@@ -93,7 +102,6 @@ def test(*args):
 
         print("Mean Result (Accuracy) is {}".format(np.mean(result_list)), flush=True)
     return np.mean(result_list)
-
 
 def test_3d(*args):
     ap_val, min_object_size, model, dataset_it, save_images, save_results, save_dir, = args
