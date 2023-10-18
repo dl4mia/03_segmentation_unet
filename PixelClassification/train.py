@@ -11,6 +11,7 @@ from PixelClassification.models import get_model
 from PixelClassification.utils.utils import AverageMeter, Logger, Visualizer
 from PixelClassification.utils2 import matching_dataset
 from scipy import ndimage
+
 torch.backends.cudnn.benchmark = True
 
 
@@ -24,8 +25,8 @@ def train():
     for i, sample in enumerate(tqdm(train_dataset_it)):
         images = sample['image']  # B 1 Z Y X
         semantic_masks = sample['semantic_mask']  # B 1 Z Y X
+
         semantic_masks.squeeze_(1)  # B Z Y X (loss expects this format)
-        instance = sample['instance_mask']
         output = model(images)  # B 3 Z Y X
         loss = criterion(output, semantic_masks.long())  # B 1 Z Y X
         loss = loss.mean()
