@@ -14,9 +14,6 @@ from scipy import ndimage
 
 torch.backends.cudnn.benchmark = True
 
-
-
-
 def train():
     loss_meter = AverageMeter()
     model.train()

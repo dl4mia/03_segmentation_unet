@@ -1,1 +1,5 @@
 *__pycache__/
+examples/DL4MIA/crops/
+examples/DL4MIA/experiment/
+examples/DL4MIA/inference/
+data/

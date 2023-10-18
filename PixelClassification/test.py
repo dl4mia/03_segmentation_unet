@@ -61,10 +61,12 @@ def test(*args):
                 instance_map_filtered = instance_map_filtered[..., diff_x // 2:-(diff_x - diff_x // 2)]
                 seed_map = seed_map[..., diff_x // 2:-(diff_x - diff_x // 2)]
 
-            results = matching_dataset([instance_map_filtered], [instance[0, 0, ...].cpu().detach().numpy()],
-                                       thresh=ap_val, show_progress=False)
+            result_list.append(np.mean(semantic_pred == instance.detach().cpu().numpy()))
+            # results = matching_dataset([instance_map_filtered], [instance[0, 0, ...].cpu().detach().numpy()],
+            #                            thresh=ap_val, show_progress=False)
             # print("AP @ {} = {:.3f}".format(str(ap_val), results.accuracy), flush=True)
-            result_list.append(results.accuracy)
+            # result_list.append(results.accuracy)
+
             base, _ = os.path.splitext(os.path.basename(sample['im_name'][0]))
             image_file_names.append(base)
             # do for each image
